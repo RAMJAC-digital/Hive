@@ -11,9 +11,8 @@ defmodule Hive.Application do
       supervisor(HiveWeb.Endpoint, []),
       # Start your own worker by calling: Hive.Worker.start_link(arg1, arg2, arg3)
       # worker(Hive.Worker, [arg1, arg2, arg3),
-      supervisor(Hornet, []),
+      supervisor(Hornet, [])
     ]
-
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Hive.Supervisor]
