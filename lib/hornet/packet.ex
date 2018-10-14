@@ -90,6 +90,12 @@ defmodule Hornet.Packet do
     packetToBuffer(pkt)
   end
 
+  def agent_ack do
+    p1 = 8890 &&& 0xff
+    p2 = 8890 >>> 8
+    "conn_req:lh" # <> << p1, p2 >>
+  end
+
   def time_bytes(s) do
     now = Time.utc_now()
     <<>>

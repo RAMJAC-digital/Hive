@@ -6,7 +6,6 @@ defmodule Hornet do
 
   @port 8889
   @remote_ip {192,168,10,1}
-  @agent_ack "conn_req:" <> <<0xff>>
 
   defstruct id: nil, port: nil, videoport: nil, flight_data: %Hornet.FlightData{}, controls: %Hornet.Control{}
 
@@ -16,11 +15,11 @@ defmodule Hornet do
 
   def init (:ok) do
     Logger.info "Attempting to connect"
-    rpc(:land, %Hornet{})
     case :gen_udp.open(8889, [:binary, ip: {192,168,10,2} ]) do
       { :ok, port } ->
-        :gen_udp.send(port, @remote_ip, @port, @agent_ack )
-        {:ok, %Hornet{port: port} }
+        Logger.info Hornet.Packet.agent_ack
+        :gen_udp.send(port, @remote_ip, @port, Hornet.Packet.agent_ack )
+        {:ok, %{port: port, sequence: 0, fightData: %Hornet.FlightData{} }
       { :error, :eaddrnotavail } ->
         Logger.info "Connection unavailable"
         :timer.sleep(1000)
@@ -36,32 +35,34 @@ defmodule Hornet do
     GenServer.cast(__MODULE__, {:land})
   end
 
-  def handle_cast({:takeoff}, hornet) do
-    rpc(:takeoff, hornet)
+  def handle_cast({:takeoff}, port) do
+    rpc(:takeoff, port)
   end
 
-  def handle_cast({:land}, hornet) do
-    rpc(:land, hornet)
+  def handle_cast({:land}, port) do
+    rpc(:land, port)
   end
 
-  def rpc(command, hornet, opts \\ []) do
+  def rpc(command, hornet) do
+    new_sequence = hornet.sequence + 1
     case command do
       :land ->
-        pkt = %Hornet.Packet.Payload{toDrone: true, packetType: Hornet.Packet.ptSet, messageID: Hornet.Packet.msgDoLand, payload: << 0x00 >>, sequence: 3}
+        pkt = %Hornet.Packet.Payload{toDrone: true, packetType: Hornet.Packet.ptSet, messageID: Hornet.Packet.msgDoLand, payload: << 0x00 >>, sequence: new_sequence}
         buffer = Hornet.Packet.packetToBuffer(pkt)
+        Logger.info buffer
         :gen_udp.send(hornet.port, @remote_ip, @port, buffer)
       :takeoff ->
-        pkt = %Hornet.Packet.Payload{toDrone: true, packetType: Hornet.Packet.ptSet, messageID: Hornet.Packet.msgDoTakeoff}
+        pkt = %Hornet.Packet.Payload{toDrone: true, packetType: Hornet.Packet.ptSet, messageID: Hornet.Packet.msgDoTakeoff, sequence: new_sequence}
         buffer = Hornet.Packet.packetToBuffer(pkt)
+        Logger.info buffer
         :gen_udp.send(hornet.port, @remote_ip, @port, buffer)
       _ ->
         :ok
     end
-    {:noreply, hornet}
+    {:noreply, %{port: hornet.port, sequence: new_sequence}}
   end
 
-  def handle_info({:udp, socket, ip, port, data}, hornet) do
-    Logger.info "a"
+  def handle_info({:udp, _socket, _ip, _port, data}, hornet) do
     {:noreply, hornet}
   end
 end

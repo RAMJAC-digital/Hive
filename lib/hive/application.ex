@@ -11,10 +11,7 @@ defmodule Hive.Application do
       supervisor(HiveWeb.Endpoint, []),
       # Start your own worker by calling: Hive.Worker.start_link(arg1, arg2, arg3)
       # worker(Hive.Worker, [arg1, arg2, arg3),
-      %{
-        id: Hornet,
-        start: {Hornet, :start_link, []}
-      }
+      supervisor(Hornet, []),
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
