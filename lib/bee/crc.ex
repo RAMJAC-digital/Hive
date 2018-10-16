@@ -1,4 +1,4 @@
-defmodule Hornet.CRC do
+defmodule Bee.CRC do
   alias __MODULE__
   use Bitwise
   require Logger

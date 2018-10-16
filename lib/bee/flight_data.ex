@@ -1,4 +1,4 @@
-defmodule Hornet.FlightData do
+defmodule Bee.FlightData do
   defstruct batteryCritical:          nil, #bool
             batteryLow:               nil, #bool
             batteryMilliVolts:        nil, #int16
@@ -45,13 +45,13 @@ defmodule Hornet.FlightData do
             windState:                nil #bool
 
   # MVOData comes from the flight log messages
-  defmodule Hornet.FlightData.MVOData do
+  defmodule Bee.FlightData.MVOData do
     defstruct positionX: nil, positionY: nil, positionZ: nil, #float32
               velocityX: nil, velocityY: nil, velocityZ: nil  #int16
   end
 
   # IMUData comes from the flight log messages
-  defmodule Hornet.FlightData.IMUData do
+  defmodule Bee.FlightData.IMUData do
     defstruct quaternionW: nil,
               quaternionX: nil, quaternionY: nil, quaternionZ: nil, #float32
               temperature: nil, #int16

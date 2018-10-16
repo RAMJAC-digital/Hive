@@ -1,4 +1,4 @@
-defmodule Hornet.Logger do
+defmodule Bee.Logger do
   @logRecordSeparator 'U'
 
   @logRecNewMVO 0x001d

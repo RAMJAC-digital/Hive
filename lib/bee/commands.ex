@@ -1,89 +1,74 @@
-defmodule Hornet.Commands do
-  def rpc_send(hornet, packet) do
-    buffer = Hornet.Packet.packetToBuffer(packet)
-    :gen_udp.send(hornet.port, hornet.remote_ip, hornet.connection_port, buffer)
-    hornet.inc_squence
+defmodule Bee.Commands do
+  alias __MODULE__
+  use Bitwise
+
+  def rpcSend(bee, packetType, message \\ nil, payload \\ nil) do
+    new_sequence =  Map.get(bee,:sequence) + 1
+    new_bee = %{ bee | :sequence => new_sequence }
+    buffer = Bee.Packet.rpcToBuffer(new_sequence, packetType, message, payload)
+    :gen_udp.send(new_bee.port, new_bee.remote_ip, new_bee.connection_port, buffer)
+    # Should we try to resend dropped packets?
+    new_bee
   end
 
-  def sendControlUpdate( ctl ) do
-    # populate the command packet fields we need
-    header = msgHdr
-    toDrone = true
-    packetType = ptData2
-    messageID = msgSetStick
-    sequence = 0
-
+  def sendControlUpdate(bee) do
     now = Time.utc_now()
-    ms = now.micoseconds
+    ms = now.microsecond
 
-    join(now.hour())
+    payload = << bee.control.rx >>> 0x07ff >>
+    |> join(bee.control.ry >>> 0x07ff)
+    |> join(bee.control.ly >>> 0x07ff)
+    |> join(bee.control.lx >>> 0x07ff)
+    |> join(1)
+    |> join(now.hour())
     |> join(now.minute())
     |> join(now.second())
     |> join(ms)
     |> join(ms &&& 0xff)
     |> join(ms >>> 8)
-    |> join(ctl.rx >>> 0x07ff)
-    |> join(ctl.ry >>> 0x07ff)
-    |> join(ctl.ly >>> 0x07ff)
-    |> join(ctl.lx >>> 0x07ff)
-    |> join(1)
-    |> time_bytes
 
-    packet =  %Hornet.Packet.Payload{
-      toDrone: true,
-      packetType: ptSet,
-      messageID: msgSetStick,
-      sequence: 0,
-      payload: payload
-    }
-    rpc_send(hornet, packet)
+    rpcSend(bee, :ptData2, :msgSetStick, payload)
   end
 
-  def sendTakeoff( ctl \\ %Hornet.Control{} ) do
-    packet = %Hornet.Packet.Payload{toDrone: true, packetType: Hornet.Packet.ptSet, messageID: Hornet.Packet.msgDoTakeoff, sequence: new_sequence + 1}
-    rpc_send(hornet, packet)
+  def sendTakeoff(bee) do
+    rpcSend(bee, :ptSet, :msgDoTakeoff)
   end
 
-  def sendLand( ctl \\ %Hornet.Control{} ) do
-    packet = %Hornet.Packet.Payload{toDrone: true, packetType: Hornet.Packet.ptSet, messageID: Hornet.Packet.msgDoLand, payload: << 0x00 >>, sequence: sequence + 1}
-    rpc_send(hornet, packet)
+  def sendLand(bee) do
+    rpcSend(bee, :ptSet, :msgDoLand, << 0x00 >>)
   end
 
   # TakePicture requests the Tello to take a JPEG snapshot.
   # The process takes a little while to complete and the video may freeze
   # during photography.  Sometime the Tello does not honour the request.
   # The pictures are stored in the tello struct until saved by eg. SaveAllPics().
-  def takePicture() do
-    packet = newPacket(ptSet, msgDoTakePic, tello.ctrlSeq, 0)
-    rpc_send(hornet, packet)
+  def takePicture(bee) do
+    rpcSend(bee, :ptSet, :msgDoTakePic)
   end
 
-  def sendFileSize() do
-    packet = %Hornet.Packet.Payload{packetType: Hornet.Packet.ptData1, payload: << 1 >>, sequence: sequence + 1}
-    rpc_send(hornet, packet)
+  def sendFileSize(bee) do
+    rpcSend(bee, :ptData1)
   end
 
-  def sendFileAckPiece(done, fID, pieceNum) do
-    packet = newPacket(Hornet.Packet.ptData1, msgFileData, done
-      |> join(fID)
-      |> join(fID >>> 8)
-      |> join(pieceNum)
-      |> join(pieceNum >>> 8)
-      |> join(pieceNum >>> 16)
-      |> join(pieceNum >>> 24)
-    )
-    rpc_send(hornet, packet)
+  def sendFileAckPiece(bee, done, fID, pieceNum) do
+    payload = done
+    |> join(fID)
+    |> join(fID >>> 8)
+    |> join(pieceNum)
+    |> join(pieceNum >>> 8)
+    |> join(pieceNum >>> 16)
+    |> join(pieceNum >>> 24)
+    rpcSend(bee, :ptData1, :msgFileData, payload)
   end
 
-  def sendFileDone(fID ,size) do
-    packet = newPacket(Hornet.Packet.ptGet, msgFileDone, fID
-      |> join(fID >>> 8)
-      |> join(size)
-      |> join(size >>> 8)
-      |> join(size >>> 16)
-      |> join(size >>> 24)
-    )
-    rpc_send(hornet, packet)
+  def sendFileDone(bee, fID ,size) do
+    payload = fID
+    |> join(fID >>> 8)
+    |> join(size)
+    |> join(size >>> 8)
+    |> join(size >>> 16)
+    |> join(size >>> 24)
+    rpcSend(bee, :ptGet, :msgFileDone, payload)
   end
 
   # VideoDisconnect closes the connection to the video channel.
@@ -93,14 +78,14 @@ defmodule Hornet.Commands do
   # GetVideoBitrate requests the current video Mbps from the Tello.
   def getVideoBitrate() do
     # newPacket(ptGet, msgQueryVideoBitrate, tello.ctrlSeq, 0)
-    # rpc_send(hornet, packet)
+    # rpcSend(bee, packet)
   end
 
   # SetVideoBitrate ask the Tello to use the specified bitrate (or auto) for video encoding.
   def setVideoBitrate(vbr) do
     # pkt = newPacket(ptSet, msgSetVideoBitrate, tello.ctrlSeq, 1)
     # pkt.payload[0] = byte(vbr)
-    # rpc_send(hornet, packet)
+    # rpcSend(bee, packet)
   end
 
   # GetVideoSpsPps asks the Tello to send SPS and PPS in video stream.
@@ -108,61 +93,82 @@ defmodule Hornet.Commands do
   # results in video artifacts.  Every 0.5 to 2.0 seconds seems a reasonable range.
   def getVideoSpsPps() do
     # newPacket(ptData2, msgQueryVideoSPSPPS, 0, 0)
-    # rpc_send(hornet, packet)
+    # rpcSend(bee, packet)
   end
 
   # SetVideoNormal requests video format to be (native) ~4:3 ratio.
   def setVideoNormal() do
     # pkt = newPacket(ptSet, msgSwitchPicVideo, tello.ctrlSeq, 1)
     # pkt.payload[0] = vmNormal
-    # rpc_send(hornet, packet)
+    # rpcSend(bee, packet)
   end
 
   # SetVideoWide requests video format to be (cropped) 16:9 ratio.
   def setVideoWide() do
     # pkt = newPacket(ptSet, msgSwitchPicVideo, tello.ctrlSeq, 1)
     # pkt.payload[0] = vmWide
-    # rpc_send(hornet, packet)
+    # rpcSend(bee, packet)
+  end
+
+  def sendDateTime(bee) do
+    now = Time.utc_now()
+    ms = now.micoseconds
+
+    payload = << now.hour >>
+    |> join(now.minute)
+    |> join(now.second)
+    |> join(ms)
+    |> join(ms &&& 0xff)
+    |> join(ms >>> 8)
+
+    rpcSend(bee, :ptSet, :msgDateTime, payload)
   end
 
   # GetAttitude requests the current flight attitude data.
   # always seems to return 5 bytes 00 00 00 c8 41
   def getAttitude() do
     # newPacket(ptGet, msgQueryAttitude, tello.ctrlSeq, 0)
-    # rpc_send(hornet, packet)
+    # rpcSend(bee, packet)
   end
 
   # SetLowBatteryThreshold set the warning threshold to a percentage value (0-100).
   # N.B. It can take a few seconds for the Tello to change this value internally.
   def setLowBatteryThreshold(thr) do
-    packet.payload = << thr >>
-    packet = newPacket(ptSet, msgSetLowBattThresh, tello.ctrlSeq, 1)
-    rpc_send(hornet, packet)
+    # packet = newPacket(:ptSet, :msgSetLowBattThresh, << thr >>)
+    # rpcSend(bee, packet)
   end
 
   # GetLowBatteryThreshold requests the threshold from the Tello which is stored in
   # FlightData.LowBatteryThreshold as an integer percentage, i.e. from 0 to 100.
   def getLowBatteryThreshold() do
     # newPacket(ptGet, msgQueryLowBattThresh, tello.ctrlSeq, 0)
-    # rpc_send(hornet, packet)
+    # rpcSend(bee, packet)
   end
 
   # GetMaxHeight asks the Tello to send us its current maximum permitted height.
   def getMaxHeight() do
     # newPacket(ptGet, msgQueryHeightLimit, tello.ctrlSeq, 0)
-    # rpc_send(hornet, packet)
+    # rpcSend(bee, packet)
   end
 
   # GetSSID asks the Tello to send us its current Wifi AP ID.
   def getSSID() do
     # newPacket(ptGet, msgQuerySSID, tello.ctrlSeq, 0)
-    # rpc_send(hornet, packet)
+    # rpcSend(bee, packet)
   end
 
   # GetVersion asks the Tello to send us its Version string
   def getVersion() do
     # newPacket(ptGet, msgQueryVersion, tello.ctrlSeq, 0)
-    # rpc_send(hornet, packet)
+    # rpcSend(bee, packet)
   end
 
+  def join(stream, append) do
+    case append do
+      nil ->
+        << stream :: binary >>
+      _ ->
+        << stream :: binary, append :: binary >>
+    end
+  end
 end

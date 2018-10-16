@@ -6,12 +6,12 @@ defmodule HiveWeb.PageController do
   end
 
   def land(conn, _params) do
-    Hornet.land :hornet1
+    Bee.land :bee1
     render conn, "index.html"
   end
 
   def takeoff(conn, _params) do
-    Hornet.takeoff :hornet1
+    Bee.takeoff :bee1
     render conn, "index.html"
   end
 end
