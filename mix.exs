@@ -9,7 +9,8 @@ defmodule Hive.Mixfile do
       elixirc_paths: elixirc_paths(Mix.env),
       compilers: [:phoenix, :gettext] ++ Mix.compilers,
       start_permanent: Mix.env == :prod,
-      deps: deps()
+      deps: deps(),
+      aliases: aliases()
     ]
   end
 
@@ -47,6 +48,12 @@ defmodule Hive.Mixfile do
 
       # Releases and deploy
       {:distillery, "~> 1.5"}
+    ]
+  end
+
+  defp aliases do
+    [
+      test: "test --no-start"
     ]
   end
 end
