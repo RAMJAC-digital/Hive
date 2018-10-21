@@ -11,8 +11,8 @@ config :hive, HiveWeb.Endpoint,
   debug_errors: true,
   code_reloader: true,
   check_origin: false,
-  watchers: [node: ["node_modules/brunch/bin/brunch", "watch", "--stdin",
-                    cd: Path.expand("../assets", __DIR__)]]
+  server: true,
+  watchers: [npm: ["start", cd: Path.expand("../assets", __DIR__)]]
 
 # ## SSL Support
 #
@@ -34,7 +34,7 @@ config :hive, HiveWeb.Endpoint,
 config :hive, HiveWeb.Endpoint,
   live_reload: [
     patterns: [
-      ~r{priv/static/.*(js|css|png|jpeg|jpg|gif|svg)$},
+      ~r{priv/static/.*(html|js|css|png|jpeg|jpg|gif|svg)$},
       ~r{priv/gettext/.*(po)$},
       ~r{lib/hive_web/views/.*(ex)$},
       ~r{lib/hive_web/templates/.*(eex)$}

@@ -7,23 +7,24 @@
 
         {
             "type": "mix_task",
-            "name": "Run HIVE Server",
+            "name": "Debug as server",
             "request": "launch",
-            "preLaunchTask": "
-            
-            ",
-            "task": "phx.server",
+            "task": "run",
+            "taskArgs": [
+                "phx.server",
+                "--trace"
+            ],
+            "startApps": false,
             "projectDir": "${workspaceRoot}"
         },
         {
             "type": "mix_task",
-            "name": "mix test",
+            "name": "Run as testing suite",
             "request": "launch",
             "task": "test",
             "taskArgs": [
                 "--trace"
             ],
-            "startApps": true,
             "projectDir": "${workspaceRoot}",
             "requireFiles": [
                 "test/**/test_helper.exs",

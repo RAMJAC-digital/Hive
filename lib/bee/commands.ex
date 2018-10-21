@@ -1,9 +1,11 @@
 defmodule Bee.Commands do
   alias __MODULE__
   use Bitwise
+  require Logger
 
   def rpcSend(bee, packetType, message \\ nil, payload \\ nil) do
-    new_sequence =  Map.get(bee,:sequence) + 1
+    mseq = Map.get(bee, :sequence)
+    new_sequence =  mseq + 1
     new_bee = %{ bee | :sequence => new_sequence }
     buffer = Bee.Packet.rpcToBuffer(new_sequence, packetType, message, payload)
     :gen_udp.send(new_bee.port, new_bee.remote_ip, new_bee.connection_port, buffer)
@@ -11,19 +13,27 @@ defmodule Bee.Commands do
     new_bee
   end
 
-  def sendControlUpdate(bee) do
+  def sendControlUpdate(bee, %{rx: rx, ry: ry, ly: ly, lx: lx }) do
     now = Time.utc_now()
     ms = now.microsecond
 
-    payload = << bee.control.rx >>> 0x07ff >>
-    |> join(bee.control.ry >>> 0x07ff)
-    |> join(bee.control.ly >>> 0x07ff)
-    |> join(bee.control.lx >>> 0x07ff)
-    |> join(1)
+    << packedAxes >> = << rx &&& 0x07ff >>
+    |> borjoin(ry &&& 0x07ff <<< 11)
+    |> borjoin(lx &&& 0x07ff <<< 22)
+    |> borjoin(ly &&& 0x07ff <<< 33)
+    |> borjoin(1 <<< 44)
+
+    payload = :binary.at(packedAxes, 1)
+    |> join(packedAxes >>> 8)
+    |> join(packedAxes >>> 16)
+    |> join(packedAxes >>> 24)
+    |> join(packedAxes >>> 32)
+    |> join(packedAxes >>> 40)
+
     |> join(now.hour())
     |> join(now.minute())
     |> join(now.second())
-    |> join(ms)
+    |> join(ms / 1000000)
     |> join(ms &&& 0xff)
     |> join(ms >>> 8)
 
@@ -111,17 +121,6 @@ defmodule Bee.Commands do
   end
 
   def sendDateTime(bee) do
-    now = Time.utc_now()
-    ms = now.micoseconds
-
-    payload = << now.hour >>
-    |> join(now.minute)
-    |> join(now.second)
-    |> join(ms)
-    |> join(ms &&& 0xff)
-    |> join(ms >>> 8)
-
-    rpcSend(bee, :ptSet, :msgDateTime, payload)
   end
 
   # GetAttitude requests the current flight attitude data.
@@ -169,6 +168,15 @@ defmodule Bee.Commands do
         << stream :: binary >>
       _ ->
         << stream :: binary, append :: binary >>
+    end
+  end
+
+  def borjoin(stream, append) do
+    case append do
+      nil ->
+        << stream >>
+      _ ->
+        << stream ||| append >>
     end
   end
 end

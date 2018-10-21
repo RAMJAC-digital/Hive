@@ -38,7 +38,15 @@ defmodule Hive.Mixfile do
       {:phoenix_live_reload, "~> 1.0", only: :dev},
       {:gettext, "~> 0.11"},
       {:cowboy, "~> 1.0"},
-      {:ffmpex, "~> 0.5.2"}
+      {:ffmpex, "~> 0.5.2"},
+      {:poison, "~> 3.1"},
+      {:guardian, "~> 1.0"},
+
+      # Factory for testing
+      {:ex_machina, "~> 2.2", only: :test},
+
+      # Releases and deploy
+      {:distillery, "~> 1.5"}
     ]
   end
 end

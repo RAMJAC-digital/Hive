@@ -54,7 +54,11 @@ defmodule Bee do
     {:noreply, Bee.Commands.sendLand(bee)}
   end
 
+  def handle_cast(:controller, bee) do
+    {:noreply, Bee.Commands.sendLand(bee)}
+  end
+
   def handle_info({ :udp, _socket, _ip, _port, data }, bee) do
-    {:noreply, bee}
+    {:noreply, Bee.Listener.listen(bee, data)}
   end
 end
