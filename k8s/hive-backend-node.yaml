@@ -1,0 +1,15 @@
+---
+apiVersion: "v1"
+kind: "Service"
+metadata:
+  name: "hive-prod-backend"
+  namespace: "default"
+  labels:
+    app: "hive-prod"
+spec:
+  ports:
+  - protocol: "TCP"
+    port: 8080
+  selector:
+    app: "hive-prod"
+    type: "NodePort"

@@ -47,13 +47,19 @@ defmodule Hive.Mixfile do
       {:ex_machina, "~> 2.2", only: :test},
 
       # Releases and deploy
-      {:distillery, "~> 1.5"}
+      {:distillery, "~> 1.5"},
+      {:tesla, "~> 0.10"}
     ]
   end
 
   defp aliases do
     [
-      test: "test --no-start"
+      test: "test --no-start",
+      #test: "moonbase.test",
+      dev: "moonbase.dev",
+      build: "moonbase.build",
+      deploy: "moonbase.deploy",
+      moonbase: "moonbase.init"
     ]
   end
 end

@@ -25,6 +25,8 @@ import Vue from 'vue';
 import Vuex from 'vuex';
 
 import channel from './common/socket';
+import tucson from './common/tucson';
+import gamepad from './common/gamepad';
 import store from './store';
 import App from './App';
 import router from './router';
@@ -33,10 +35,12 @@ Vue.use(Vuex);
 Vue.config.productionTip = false;
 /* eslint-disable no-new */
 new Vue({
-  channel,
   el: '#app',
   router,
   store,
+  gamepad,
+  channel,
+  tucson,
   components: { App },
   template: '<App/>',
 });

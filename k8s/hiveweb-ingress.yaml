@@ -1,0 +1,13 @@
+---
+apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: hive-prod-ingress
+  annotations:
+    kubernetes.io/ingress.global-static-ip-name: hive-ip-1
+  labels:
+    app: hive-prod
+spec:
+  backend:
+    serviceName: hive-prod-backend
+    servicePort: 80

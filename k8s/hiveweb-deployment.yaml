@@ -1,0 +1,37 @@
+---
+apiVersion: "extensions/v1beta1"
+kind: "Deployment"
+metadata:
+  name: "hive-prod"
+  namespace: "default"
+  labels:
+    app: "hive-prod"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: "hive-prod"
+  template:
+    metadata:
+      labels:
+        app: "hive-prod"
+    spec:
+      containers:
+      - name: "hive"
+        image: "gcr.io/evdotio/hive:latest"
+---
+apiVersion: "autoscaling/v1"
+kind: "HorizontalPodAutoscaler"
+metadata:
+  name: "hive-prod-hpa"
+  namespace: "default"
+  labels:
+    app: "hive-prod"
+spec:
+  scaleTargetRef:
+    kind: "Deployment"
+    name: "hive-prod"
+    apiVersion: "apps/v1beta1"
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 80

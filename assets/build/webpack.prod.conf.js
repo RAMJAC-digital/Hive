@@ -96,9 +96,9 @@ const webpackConfig = merge(baseWebpackConfig, {
       // necessary to consistently work with multiple chunks via CommonsChunkPlugin
       chunksSortMode: 'dependency',
       metaData: {
-        phoenix: '<%= render @view_module, @view_template, assigns %>',
-        phoenix_info: '<%= get_flash(@conn, :info) %>',
-        phoenix_error: '<%= get_flash(@conn, :error) %>'
+        phoenix: `<%= render @view_module, @view_template, assigns %>`,
+        phoenix_info: `<%= get_flash(@conn, :info) %>`,
+        phoenix_error: `<%= get_flash(@conn, :error) %>`
       }
     }),
     // keep module.id stable when vendor modules does not change
