@@ -9,10 +9,12 @@ defmodule Hive.Application do
     children = [
       # Start the endpoint when the application starts
       supervisor(HiveWeb.Endpoint, []),
-      # Start your own worker by calling: Hive.Worker.start_link(arg1, arg2, arg3)
-      # worker(Hive.Worker, [arg1, arg2, arg3),
-      supervisor(Bee, [%{name: :bee1, local_ip: {192,168,10,2}, remote_ip: {192,168,10,1}, port: 8889}])
+      Osc,
+      supervisor(Bee, [
+        %{name: :bee1, local_ip: {192, 168, 10, 2}, remote_ip: {192, 168, 10, 1}, port: 8889}
+      ])
     ]
+
     # See https://hexdocs.pm/elixir/Supervisor.html
     # for other strategies and supported options
     opts = [strategy: :one_for_one, name: Hive.Supervisor]

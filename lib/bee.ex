@@ -9,33 +9,30 @@ defmodule Bee do
 
   defstruct port: nil,
             connection_port: 8889,
-            remote_ip: {192,168,10,1},
-            local_ip: {192,168,10,2},
+            remote_ip: {192, 168, 10, 1},
+            local_ip: {192, 168, 10, 2},
             flightData: %Bee.FlightData{},
             control: %Bee.Control{},
             sequence: 0
 
   def agent_ack do
-    p1 = 8890 &&& 0xff
-    p2 = 8890 >>> 8
-    "conn_req:lh" # <> << p1, p2 >>
+    # p1 = <<6038 &&& 0xFF>>
+    # p2 = <<6038 >>> 8>>
+    # <> <<p1, p2>>
+    "conn_req:lh"
   end
 
   def start_link(opts) do
-    GenServer.start_link(__MODULE__, %{local_ip: opts.local_ip, remote_ip: opts.remote_ip, connection_port: opts.port}, name: opts.name)
+    GenServer.start_link(
+      __MODULE__,
+      %{local_ip: opts.local_ip, remote_ip: opts.remote_ip, connection_port: opts.port},
+      name: opts.name
+    )
   end
 
-  def init (opts) do
-    Logger.info "Attempting to connect"
-    case :gen_udp.open(opts.connection_port, [:binary, active: true, ip: opts.local_ip]) do
-      { :ok, port } ->
-        :gen_udp.send(port, opts.remote_ip, opts.connection_port, agent_ack() )
-        {:ok, %Bee{port: port, connection_port: opts.connection_port, sequence: 0, flightData: %Bee.FlightData{}, control: %Bee.Control{}} }
-      { :error, :eaddrnotavail } ->
-        Logger.info "Connection unavailable"
-        :timer.sleep(1000)
-        init(opts)
-    end
+  def init(opts) do
+    Logger.info("Starting")
+    {:ok, opts, {:continue, :init_server}}
   end
 
   def takeoff(name) do
@@ -47,18 +44,45 @@ defmodule Bee do
   end
 
   def handle_cast(:takeoff, bee) do
-    {:noreply, Bee.Commands.sendTakeoff(bee)}
+    {:noreply, Bee.Commands.sendTakeoff(bee), {:continue, :connected}}
   end
 
   def handle_cast(:land, bee) do
-    {:noreply, Bee.Commands.sendLand(bee)}
+    {:noreply, Bee.Commands.sendLand(bee), {:continue, :connected}}
   end
 
   def handle_cast(:controller, bee) do
-    {:noreply, Bee.Commands.sendLand(bee)}
+    {:noreply, Bee.Commands.sendLand(bee), {:continue, :connected}}
   end
 
-  def handle_info({ :udp, _socket, _ip, _port, data }, bee) do
+  def handle_continue(:init_server, opts) do
+    Logger.info("Connecting")
+
+    case :gen_udp.open(opts.connection_port, [:binary, active: true, ip: opts.local_ip]) do
+      {:ok, port} ->
+        :gen_udp.send(port, opts.remote_ip, opts.connection_port, agent_ack())
+
+        {:noreply,
+         %Bee{
+           port: port,
+           connection_port: opts.connection_port,
+           sequence: 0,
+           flightData: %Bee.FlightData{},
+           control: %Bee.Control{}
+         }, {:continue, :connected}}
+
+      {:error, _reason} ->
+        Logger.info("Connection unavailable")
+        :timer.sleep(1000)
+        {:noreply, opts, {:continue, :init_server}}
+    end
+  end
+
+  def handle_continue(:connected, bee) do
+    {:noreply, bee}
+  end
+
+  def handle_info({:udp, _socket, _ip, _port, data}, bee) do
     {:noreply, Bee.Listener.listen(bee, data)}
   end
 end

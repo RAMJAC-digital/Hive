@@ -9,6 +9,9 @@
             "command": "mix",
             "args": [
                 "phx.server"
+            ],
+            "problemMatcher": [
+                "$erlang"
             ]
         },
         {
