@@ -9,7 +9,7 @@ defmodule Hive.Application do
     children = [
       # Start the endpoint when the application starts
       supervisor(HiveWeb.Endpoint, []),
-      Osc,
+      Imperium,
       supervisor(Bee, [
         %{name: :bee1, local_ip: {192, 168, 10, 2}, remote_ip: {192, 168, 10, 1}, port: 8889}
       ])

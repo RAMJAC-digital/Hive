@@ -1,4 +1,4 @@
-defmodule Osc.Supervisor do
+defmodule Imperium.Supervisor do
   use Supervisor
 
   def start_link(args \\ []) do
@@ -8,7 +8,8 @@ defmodule Osc.Supervisor do
   def init(args) do
     children = [
       # Define workers and child supervisors to be supervised
-      worker(Osc.Listener, args)
+      worker(Osc.Listener, args),
+      worker(Osc.Sender, args)
     ]
 
     opts = [strategy: :one_for_one, name: Osc.Supervisor]
