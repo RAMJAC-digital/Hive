@@ -301,18 +301,13 @@ defmodule Bee.Packet do
 
   def controllerToPayload(rx, ry, lx, ly) do
     now = Time.utc_now()
-    {msf, _rest} = now.microsecond()
-    ms = Kernel.trunc(msf / 1_000_000)
-    rrx = controlDataToTello(rx) &&& 0x07FF
-    rry = controlDataToTello(ry) &&& 0x07FF <<< 11
-    lly = controlDataToTello(ly) &&& 0x07FF <<< 22
-    llx = controlDataToTello(lx) &&& 0x07FF <<< 33
+    {ms, _rest} = now.microsecond()
 
     packedAxes =
-      rrx
-      |> borjoin(rry)
-      |> borjoin(lly)
-      |> borjoin(llx)
+      (controlDataToTello(rx) &&& 0x07FF)
+      |> borjoin((controlDataToTello(ry) &&& 0x07FF) <<< 11)
+      |> borjoin((controlDataToTello(ly) &&& 0x07FF) <<< 22)
+      |> borjoin((controlDataToTello(lx) &&& 0x07FF) <<< 33)
       |> borjoin(0 <<< 44)
 
     payload =
@@ -327,11 +322,6 @@ defmodule Bee.Packet do
       |> join(<<now.second()>>)
       |> join(<<ms &&& 0xFF>>)
       |> join(<<ms >>> 8>>)
-
-    Logger.info("!!!")
-    Logger.info(packedAxes)
-    Logger.info(llx)
-    Logger.info(lly)
 
     payload
   end

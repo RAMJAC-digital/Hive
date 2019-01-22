@@ -73,7 +73,7 @@ defmodule Bee.Server do
 
       {:error, reason} ->
         Logger.info("Connection unavailable #{reason}")
-        :timer.sleep(1000)
+        :timer.sleep(100_000)
         {:noreply, opts, {:continue, :init_server}}
     end
   end
