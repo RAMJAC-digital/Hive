@@ -30,7 +30,6 @@ defmodule Imperium.Server do
           end).()
 
     ctrl = new_imperium.controller
-    Logger.info("NewL #{ctrl.xl},#{ctrl.yl},#{ctrl.xr},#{ctrl.yr}")
     {:noreply, new_imperium}
   end
 

@@ -228,8 +228,9 @@ defmodule Bee.Packet do
   end
 
   def controllerToPayload(rx, ry, lx, ly) do
-    {mega, seconds, ms} = :os.timestamp()
     now = Time.utc_now()
+    {msf, _rest} = now.microsecond()
+    ms = Kernel.trunc(msf / 1_000_000)
     rrx = controlDataToTello(rx) &&& 0x07FF
     rry = controlDataToTello(ry) &&& 0x07FF <<< 11
     lly = controlDataToTello(ly) &&& 0x07FF <<< 22
@@ -242,9 +243,6 @@ defmodule Bee.Packet do
       |> borjoin(llx)
       |> borjoin(0 <<< 44)
 
-    Logger.info("!!!")
-    Logger.info(ms)
-
     payload =
       <<:binary.at(<<packedAxes>>, 0)>>
       |> join(<<packedAxes >>> 8>>)
@@ -253,15 +251,13 @@ defmodule Bee.Packet do
       |> join(<<packedAxes >>> 32>>)
       |> join(<<packedAxes >>> 40>>)
       |> join(<<now.hour()>>)
-      |> join(<<mega>>)
-      |> join(<<seconds>>)
-      |> join(<<ms>>)
+      |> join(<<now.minute()>>)
+      |> join(<<now.second()>>)
       |> join(<<ms &&& 0xFF>>)
       |> join(<<ms >>> 8>>)
 
-    Logger.info(packedAxes)
     Logger.info("!!!")
-    Logger.info(payload)
+    Logger.info(packedAxes)
 
     payload
   end
@@ -344,6 +340,19 @@ defmodule Bee.Packet do
         <<stream::binary>>
 
       _ ->
+        <<stream::binary, append::binary>>
+    end
+  end
+
+  defp join(stream, :test, append) do
+    case append do
+      nil ->
+        Logger.info("***")
+        <<stream::binary>>
+
+      _ ->
+        Logger.info("!!!")
+        Logger.info(byte_size(append))
         <<stream::binary, append::binary>>
     end
   end
