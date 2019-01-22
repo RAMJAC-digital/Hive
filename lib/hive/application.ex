@@ -10,9 +10,7 @@ defmodule Hive.Application do
       # Start the endpoint when the application starts
       supervisor(HiveWeb.Endpoint, []),
       Imperium,
-      supervisor(Bee, [
-        %{name: :bee1, local_ip: {192, 168, 10, 2}, remote_ip: {192, 168, 10, 1}, port: 8889}
-      ])
+      Bee
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

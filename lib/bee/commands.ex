@@ -5,39 +5,18 @@ defmodule Bee.Commands do
 
   def rpcSend(bee, packetType, message \\ nil, payload \\ nil) do
     mseq = Map.get(bee, :sequence)
-    new_sequence =  mseq + 1
-    new_bee = %{ bee | :sequence => new_sequence }
+    new_sequence = mseq + 1
+    new_bee = %{bee | :sequence => new_sequence}
     buffer = Bee.Packet.rpcToBuffer(new_sequence, packetType, message, payload)
     :gen_udp.send(new_bee.port, new_bee.remote_ip, new_bee.connection_port, buffer)
     # Should we try to resend dropped packets?
     new_bee
   end
 
-  def sendControlUpdate(bee, %{rx: rx, ry: ry, ly: ly, lx: lx }) do
-    now = Time.utc_now()
-    ms = now.microsecond
-
-    << packedAxes >> = << rx &&& 0x07ff >>
-    |> borjoin(ry &&& 0x07ff <<< 11)
-    |> borjoin(lx &&& 0x07ff <<< 22)
-    |> borjoin(ly &&& 0x07ff <<< 33)
-    |> borjoin(1 <<< 44)
-
-    payload = :binary.at(packedAxes, 1)
-    |> join(packedAxes >>> 8)
-    |> join(packedAxes >>> 16)
-    |> join(packedAxes >>> 24)
-    |> join(packedAxes >>> 32)
-    |> join(packedAxes >>> 40)
-
-    |> join(now.hour())
-    |> join(now.minute())
-    |> join(now.second())
-    |> join(ms / 1000000)
-    |> join(ms &&& 0xff)
-    |> join(ms >>> 8)
-
-    rpcSend(bee, :ptData2, :msgSetStick, payload)
+  def sendControlUpdate(bee, %Imperium.Controller{xr: rx, yr: ry, yl: ly, xl: lx}) do
+    payload = Bee.Packet.controllerToPayload(rx, ry, lx, ly)
+    new_bee = Map.replace!(bee, :busy, true)
+    rpcSend(new_bee, :ptData2, :msgSetStick, payload)
   end
 
   def sendTakeoff(bee) do
@@ -45,7 +24,7 @@ defmodule Bee.Commands do
   end
 
   def sendLand(bee) do
-    rpcSend(bee, :ptSet, :msgDoLand, << 0x00 >>)
+    rpcSend(bee, :ptSet, :msgDoLand, <<0x00>>)
   end
 
   # TakePicture requests the Tello to take a JPEG snapshot.
@@ -61,23 +40,27 @@ defmodule Bee.Commands do
   end
 
   def sendFileAckPiece(bee, done, fID, pieceNum) do
-    payload = done
-    |> join(fID)
-    |> join(fID >>> 8)
-    |> join(pieceNum)
-    |> join(pieceNum >>> 8)
-    |> join(pieceNum >>> 16)
-    |> join(pieceNum >>> 24)
+    payload =
+      done
+      |> join(fID)
+      |> join(fID >>> 8)
+      |> join(pieceNum)
+      |> join(pieceNum >>> 8)
+      |> join(pieceNum >>> 16)
+      |> join(pieceNum >>> 24)
+
     rpcSend(bee, :ptData1, :msgFileData, payload)
   end
 
-  def sendFileDone(bee, fID ,size) do
-    payload = fID
-    |> join(fID >>> 8)
-    |> join(size)
-    |> join(size >>> 8)
-    |> join(size >>> 16)
-    |> join(size >>> 24)
+  def sendFileDone(bee, fID, size) do
+    payload =
+      fID
+      |> join(fID >>> 8)
+      |> join(size)
+      |> join(size >>> 8)
+      |> join(size >>> 16)
+      |> join(size >>> 24)
+
     rpcSend(bee, :ptGet, :msgFileDone, payload)
   end
 
@@ -85,6 +68,7 @@ defmodule Bee.Commands do
   def videoDisconnect() do
     # TODO Should we tell the Tello we are stopping video listening?
   end
+
   # GetVideoBitrate requests the current video Mbps from the Tello.
   def getVideoBitrate() do
     # newPacket(ptGet, msgQueryVideoBitrate, tello.ctrlSeq, 0)
@@ -165,18 +149,10 @@ defmodule Bee.Commands do
   def join(stream, append) do
     case append do
       nil ->
-        << stream :: binary >>
-      _ ->
-        << stream :: binary, append :: binary >>
-    end
-  end
+        <<stream::binary>>
 
-  def borjoin(stream, append) do
-    case append do
-      nil ->
-        << stream >>
       _ ->
-        << stream ||| append >>
+        <<stream::binary, append::binary>>
     end
   end
 end

@@ -22,44 +22,71 @@ defmodule Imperium.Server do
     new_imperium =
       data
       |> Imperium.OSC.parse()
-      |> (fn msg -> event_handler(msg, imperium) end).()
+      |> (fn msg ->
+            case msg do
+              {:osc_bundle, {:osc_timetag, _timestamp}, data} ->
+                extract_values(data, imperium)
+            end
+          end).()
 
+    ctrl = new_imperium.controller
+    Logger.info("NewL #{ctrl.xl},#{ctrl.yl},#{ctrl.xr},#{ctrl.yr}")
     {:noreply, new_imperium}
   end
 
-  defp event_handler(msg, imperium) do
-    case msg do
-      {:osc_bundle, {:osc_timetag, timestamp}, data} ->
-        extract_values(data)
-        nil
-    end
+  def extract_values(data, imperium) do
+    return_imperium =
+      Enum.reduce(data, imperium, fn item, new_imperium ->
+        case item do
+          {input, [reading]} ->
+            {:osc_float, value} = reading
+            update_imperium(new_imperium, input, value)
+
+          {input, reading} ->
+            values =
+              Enum.each(reading, fn pad ->
+                {:osc_float, value} = pad
+                value
+              end)
+
+            update_imperium(new_imperium, input, values)
+
+          values ->
+            Enum.reduce(values, new_imperium, fn item, new_new_imperium ->
+              extract_values(item, new_new_imperium)
+            end)
+        end
+      end)
+
+    return_imperium
   end
 
-  def extract_values(data) do
-    Enum.each(data, fn item ->
-      case item do
-        {input, [reading]} ->
-          Logger.info(input)
-          {:osc_float, value} = reading
-          Logger.info(value)
-          nil
+  def update_imperium(imperium, field, value) do
+    ctrl =
+      case field do
+        "/RightPad/x" ->
+          Map.replace!(imperium.controller, :xr, value)
 
-        {input, reading} ->
-          Enum.each(reading, fn pad ->
-            {:osc_float, value} = pad
-            Logger.info("Pad: #{value}")
-          end)
+        "/RightPad/y" ->
+          Map.replace!(imperium.controller, :yr, value)
 
-          nil
+        "/LeftPad/x" ->
+          Map.replace!(imperium.controller, :xl, value)
 
-        values ->
-          Enum.each(values, fn item ->
-            extract_values(item)
-          end)
+        "/LeftPad/y" ->
+          Map.replace!(imperium.controller, :yl, value)
 
-          nil
+        _rest ->
+          imperium.controller
       end
-    end)
+
+    Bee.API.controller(:bee1, ctrl)
+
+    Map.replace!(
+      imperium,
+      :controller,
+      ctrl
+    )
   end
 
   def event_cast({ip, port, {path, args}}, imperium) do

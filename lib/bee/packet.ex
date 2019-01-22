@@ -222,6 +222,50 @@ defmodule Bee.Packet do
     end
   end
 
+  def controlDataToTello(cord) do
+    rnge = -32767 + cord * (32767 * 2 - 1)
+    Kernel.trunc(rnge / 90 + 1024)
+  end
+
+  def controllerToPayload(rx, ry, lx, ly) do
+    {mega, seconds, ms} = :os.timestamp()
+    now = Time.utc_now()
+    rrx = controlDataToTello(rx) &&& 0x07FF
+    rry = controlDataToTello(ry) &&& 0x07FF <<< 11
+    lly = controlDataToTello(ly) &&& 0x07FF <<< 22
+    llx = controlDataToTello(lx) &&& 0x07FF <<< 33
+
+    packedAxes =
+      rrx
+      |> borjoin(rry)
+      |> borjoin(lly)
+      |> borjoin(llx)
+      |> borjoin(0 <<< 44)
+
+    Logger.info("!!!")
+    Logger.info(ms)
+
+    payload =
+      <<:binary.at(<<packedAxes>>, 0)>>
+      |> join(<<packedAxes >>> 8>>)
+      |> join(<<packedAxes >>> 16>>)
+      |> join(<<packedAxes >>> 24>>)
+      |> join(<<packedAxes >>> 32>>)
+      |> join(<<packedAxes >>> 40>>)
+      |> join(<<now.hour()>>)
+      |> join(<<mega>>)
+      |> join(<<seconds>>)
+      |> join(<<ms>>)
+      |> join(<<ms &&& 0xFF>>)
+      |> join(<<ms >>> 8>>)
+
+    Logger.info(packedAxes)
+    Logger.info("!!!")
+    Logger.info(payload)
+
+    payload
+  end
+
   # dataToPacket takes a raw buffer of bytes and populates our packet struct
   def dataToPacket(data) do
     if data == "conn_ack:lh" do
@@ -285,19 +329,16 @@ defmodule Bee.Packet do
     |> join(<<sequence>>)
     |> join(<<sequence >>> 8>>)
     |> join(payload)
-    |> (fn s ->
-          crc16 = Bee.CRC.calculateCRC16(s)
+    |> (fn seq ->
+          crc16 = Bee.CRC.calculateCRC16(seq)
 
-          s
+          seq
           |> join(<<crc16>>)
           |> join(<<crc16 >>> 8>>)
         end).()
   end
 
-  def fieldFromPayload(field, payload) do
-  end
-
-  def join(stream, append) do
+  defp join(stream, append) do
     case append do
       nil ->
         <<stream::binary>>
@@ -305,5 +346,9 @@ defmodule Bee.Packet do
       _ ->
         <<stream::binary, append::binary>>
     end
+  end
+
+  defp borjoin(stream, append) do
+    stream ||| append
   end
 end

@@ -1,11 +1,8 @@
 defmodule Imperium do
   use GenServer
-  use Bitwise
-  require Logger
-
   alias __MODULE__
 
-  defstruct controllers: [],
+  defstruct controller: %Imperium.Controller{},
             socket: nil
 
   def start_link(_opts) do
