@@ -223,43 +223,8 @@ defmodule Bee.Packet do
   end
 
   def controlDataToTello(cord) do
-    rnge = -32767 + cord * (32767 * 2 - 1)
-    Kernel.trunc(rnge / 90 + 1024)
-  end
-
-  def controllerToPayload(rx, ry, lx, ly) do
-    now = Time.utc_now()
-    {msf, _rest} = now.microsecond()
-    ms = Kernel.trunc(msf / 1_000_000)
-    rrx = controlDataToTello(rx) &&& 0x07FF
-    rry = controlDataToTello(ry) &&& 0x07FF <<< 11
-    lly = controlDataToTello(ly) &&& 0x07FF <<< 22
-    llx = controlDataToTello(lx) &&& 0x07FF <<< 33
-
-    packedAxes =
-      rrx
-      |> borjoin(rry)
-      |> borjoin(lly)
-      |> borjoin(llx)
-      |> borjoin(0 <<< 44)
-
-    payload =
-      <<:binary.at(<<packedAxes>>, 0)>>
-      |> join(<<packedAxes >>> 8>>)
-      |> join(<<packedAxes >>> 16>>)
-      |> join(<<packedAxes >>> 24>>)
-      |> join(<<packedAxes >>> 32>>)
-      |> join(<<packedAxes >>> 40>>)
-      |> join(<<now.hour()>>)
-      |> join(<<now.minute()>>)
-      |> join(<<now.second()>>)
-      |> join(<<ms &&& 0xFF>>)
-      |> join(<<ms >>> 8>>)
-
-    Logger.info("!!!")
-    Logger.info(packedAxes)
-
-    payload
+    rnge = cord * 660.0
+    Kernel.trunc(rnge + 1024)
   end
 
   # dataToPacket takes a raw buffer of bytes and populates our packet struct
@@ -334,25 +299,49 @@ defmodule Bee.Packet do
         end).()
   end
 
+  def controllerToPayload(rx, ry, lx, ly) do
+    now = Time.utc_now()
+    {msf, _rest} = now.microsecond()
+    ms = Kernel.trunc(msf / 1_000_000)
+    rrx = controlDataToTello(rx) &&& 0x07FF
+    rry = controlDataToTello(ry) &&& 0x07FF <<< 11
+    lly = controlDataToTello(ly) &&& 0x07FF <<< 22
+    llx = controlDataToTello(lx) &&& 0x07FF <<< 33
+
+    packedAxes =
+      rrx
+      |> borjoin(rry)
+      |> borjoin(lly)
+      |> borjoin(llx)
+      |> borjoin(0 <<< 44)
+
+    payload =
+      <<0xFF &&& :binary.at(<<packedAxes>>, 0)>>
+      |> join(<<packedAxes >>> 8 &&& 0xFF>>)
+      |> join(<<packedAxes >>> 16 &&& 0xFF>>)
+      |> join(<<packedAxes >>> 24 &&& 0xFF>>)
+      |> join(<<packedAxes >>> 32 &&& 0xFF>>)
+      |> join(<<packedAxes >>> 40 &&& 0xFF>>)
+      |> join(<<now.hour()>>)
+      |> join(<<now.minute()>>)
+      |> join(<<now.second()>>)
+      |> join(<<ms &&& 0xFF>>)
+      |> join(<<ms >>> 8>>)
+
+    Logger.info("!!!")
+    Logger.info(packedAxes)
+    Logger.info(llx)
+    Logger.info(lly)
+
+    payload
+  end
+
   defp join(stream, append) do
     case append do
       nil ->
         <<stream::binary>>
 
       _ ->
-        <<stream::binary, append::binary>>
-    end
-  end
-
-  defp join(stream, :test, append) do
-    case append do
-      nil ->
-        Logger.info("***")
-        <<stream::binary>>
-
-      _ ->
-        Logger.info("!!!")
-        Logger.info(byte_size(append))
         <<stream::binary, append::binary>>
     end
   end
