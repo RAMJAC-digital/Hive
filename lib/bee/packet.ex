@@ -223,8 +223,8 @@ defmodule Bee.Packet do
   end
 
   def controlDataToTello(cord) do
-    rnge = cord * 660.0
-    Kernel.trunc(rnge + 1024)
+    rnge = Kernel.trunc(cord * 660.0 - 330.0)
+    rnge + 1024
   end
 
   # dataToPacket takes a raw buffer of bytes and populates our packet struct
@@ -311,16 +311,40 @@ defmodule Bee.Packet do
       |> borjoin(0 <<< 44)
 
     payload =
-      <<0xFF &&& :binary.at(<<packedAxes>>, 0)>>
-      |> join(<<packedAxes >>> 8 &&& 0xFF>>)
-      |> join(<<packedAxes >>> 16 &&& 0xFF>>)
-      |> join(<<packedAxes >>> 24 &&& 0xFF>>)
-      |> join(<<packedAxes >>> 32 &&& 0xFF>>)
-      |> join(<<packedAxes >>> 40 &&& 0xFF>>)
+      <<:binary.at(<<packedAxes>>, 0)>>
+      |> join(<<packedAxes >>> 8>>)
+      |> join(<<packedAxes >>> 16>>)
+      |> join(<<packedAxes >>> 24>>)
+      |> join(<<packedAxes >>> 32>>)
+      |> join(<<packedAxes >>> 40>>)
       |> join(<<now.hour()>>)
       |> join(<<now.minute()>>)
       |> join(<<now.second()>>)
       |> join(<<ms &&& 0xFF>>)
+      |> join(<<ms >>> 8>>)
+
+    payload
+  end
+
+  def dateTimeToPayload() do
+    now = DateTime.utc_now()
+    {ms, _rest} = now.microsecond()
+
+    payload =
+      <<0x0000>>
+      |> join(<<now.year()>>)
+      |> join(<<now.year() >>> 8>>)
+      |> join(<<now.month()>>)
+      |> join(<<now.month() >>> 8>>)
+      |> join(<<now.day()>>)
+      |> join(<<now.day() >>> 8>>)
+      |> join(<<now.hour()>>)
+      |> join(<<now.hour() >>> 8>>)
+      |> join(<<now.minute()>>)
+      |> join(<<now.minute() >>> 8>>)
+      |> join(<<now.second()>>)
+      |> join(<<now.second() >>> 8>>)
+      |> join(<<ms>>)
       |> join(<<ms >>> 8>>)
 
     payload

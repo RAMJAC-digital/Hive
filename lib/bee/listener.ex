@@ -85,10 +85,7 @@ defmodule Bee.Listener do
 
       :msgSetDateTime ->
         Logger.info("DateTime request received from Tello")
-        # Bee.Commands.sendDateTime(bee)
-        # Bee.Packet.msgDoLand -> TODO
-        # Bee.Packet.msgDoTakeoff -> TODO
-        bee
+        Bee.Commands.sendTimeUpdate(bee)
 
       :msgLightStrength ->
         Logger.info("msg light stength")

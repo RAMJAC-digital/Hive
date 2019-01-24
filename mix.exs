@@ -42,6 +42,7 @@ defmodule Hive.Mixfile do
       {:ffmpex, "~> 0.5.2"},
       {:poison, "~> 3.1"},
       {:guardian, "~> 1.0"},
+      {:decimal, "~> 1.0"},
 
       # Factory for testing
       {:ex_machina, "~> 2.2", only: :test},

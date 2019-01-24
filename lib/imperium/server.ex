@@ -5,6 +5,8 @@ defmodule Imperium.Server do
   use GenServer
   require Logger
 
+  alias Decimal, as: D
+
   @default_udp_port 8000
 
   def start_link(options \\ []) do
@@ -61,19 +63,21 @@ defmodule Imperium.Server do
   end
 
   def update_imperium(imperium, field, value) do
+    round_value = D.reduce(D.round(D.from_float(value), 3)) |> D.to_float()
+
     ctrl =
       case field do
         "/RightPad/x" ->
-          Map.replace!(imperium.controller, :xr, value)
+          Map.replace!(imperium.controller, :xr, round_value)
 
         "/RightPad/y" ->
-          Map.replace!(imperium.controller, :yr, value)
+          Map.replace!(imperium.controller, :yr, round_value)
 
         "/LeftPad/x" ->
-          Map.replace!(imperium.controller, :xl, value)
+          Map.replace!(imperium.controller, :xl, round_value)
 
         "/LeftPad/y" ->
-          Map.replace!(imperium.controller, :yl, value)
+          Map.replace!(imperium.controller, :yl, round_value)
 
         _rest ->
           imperium.controller

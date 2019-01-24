@@ -19,6 +19,11 @@ defmodule Bee.Commands do
     rpcSend(new_bee, :ptData2, :msgSetStick, payload)
   end
 
+  def sendTimeUpdate(bee) do
+    payload = Bee.Packet.dateTimeToPayload()
+    rpcSend(bee, :ptData1, :msgSetDateTime, payload)
+  end
+
   def sendTakeoff(bee) do
     rpcSend(bee, :ptSet, :msgDoTakeoff)
   end
