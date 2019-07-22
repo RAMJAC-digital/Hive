@@ -28,8 +28,16 @@ defmodule Bee.Commands do
     rpcSend(bee, :ptSet, :msgDoTakeoff)
   end
 
+  def sendThrowTakeoff(bee) do
+    rpcSend(bee, :ptGet, :msgDoThrowTakeoff, <<0x00>>)
+  end
+
   def sendLand(bee) do
     rpcSend(bee, :ptSet, :msgDoLand, <<0x00>>)
+  end
+
+  def sendPalmLand(bee) do
+    rpcSend(bee, :ptSet, :msgDoPalmLand, <<0x00>>)
   end
 
   # TakePicture requests the Tello to take a JPEG snapshot.
@@ -107,9 +115,6 @@ defmodule Bee.Commands do
     # pkt = newPacket(ptSet, msgSwitchPicVideo, tello.ctrlSeq, 1)
     # pkt.payload[0] = vmWide
     # rpcSend(bee, packet)
-  end
-
-  def sendDateTime(bee) do
   end
 
   # GetAttitude requests the current flight attitude data.

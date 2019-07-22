@@ -31,7 +31,6 @@ defmodule Imperium.Server do
             end
           end).()
 
-    ctrl = new_imperium.controller
     {:noreply, new_imperium}
   end
 
@@ -45,12 +44,12 @@ defmodule Imperium.Server do
 
           {input, reading} ->
             values =
-              Enum.each(reading, fn pad ->
+              Enum.map(reading, fn pad ->
                 {:osc_float, value} = pad
                 value
               end)
 
-            update_imperium(new_imperium, input, values)
+            update_imperium_pads(new_imperium, input, values)
 
           values ->
             Enum.reduce(values, new_imperium, fn item, new_new_imperium ->
@@ -90,6 +89,26 @@ defmodule Imperium.Server do
       :controller,
       ctrl
     )
+  end
+
+  def update_imperium_pads(imperium, _field, [takeoff, throw_takeoff, land, palm_land]) do
+    if takeoff == 1.0 do
+      Bee.API.takeoff(:bee1)
+    end
+
+    if throw_takeoff == 1.0 do
+      Bee.API.throwTakeoff(:bee1)
+    end
+
+    if land == 1.0 do
+      Bee.API.land(:bee1)
+    end
+
+    if palm_land == 1.0 do
+      Bee.API.palmLand(:bee1)
+    end
+
+    imperium
   end
 
   def event_cast({ip, port, {path, args}}, imperium) do

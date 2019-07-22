@@ -149,9 +149,9 @@ defmodule Bee.Listener do
         # Logger.info("Parsed Wifi Strength: %d, Interference: %d\n", WifiStrength, WifiInterference)
         bee
 
-      _ ->
+      rest ->
         # - ID: <%d>, Size %d, Type: %d\n% x\n", packet.messageID, packet.size13, packet.packetType, packet.payload)
-        Logger.info("Unknown message from Tello")
+        Logger.info("Unknown message from Tello: #{rest}")
         bee
     end
 

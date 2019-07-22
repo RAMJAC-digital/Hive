@@ -7,13 +7,6 @@ defmodule Bee.Server do
 
   import Bee.Listener
 
-  defp agent_ack do
-    # p1 = <<6038 &&& 0xFF>>
-    # p2 = <<6038 >>> 8>>
-    # <> <<p1, p2>>
-    "conn_req:lh"
-  end
-
   def unlock(name) do
     GenServer.cast(name, :unlock)
   end
@@ -38,8 +31,18 @@ defmodule Bee.Server do
   end
 
   @impl true
+  def handle_cast(:throw_takeoff, bee) do
+    {:noreply, Bee.Commands.sendThrowTakeoff(bee), {:continue, :connected}}
+  end
+
+  @impl true
   def handle_cast(:land, bee) do
     {:noreply, Bee.Commands.sendLand(bee), {:continue, :connected}}
+  end
+
+  @impl true
+  def handle_cast(:palm_land, bee) do
+    {:noreply, Bee.Commands.sendPalmLand(bee), {:continue, :connected}}
   end
 
   @impl true
@@ -60,7 +63,9 @@ defmodule Bee.Server do
   def handle_continue(:init_server, opts) do
     case :gen_udp.open(opts.connection_port, [:binary, active: true, ip: opts.local_ip]) do
       {:ok, port} ->
-        :gen_udp.send(port, opts.remote_ip, opts.connection_port, agent_ack())
+        packet = Bee.Packet.agent_ack(6038)
+        Logger.info(packet)
+        :gen_udp.send(port, opts.remote_ip, opts.connection_port, packet)
 
         {:noreply,
          %Bee{
@@ -73,7 +78,7 @@ defmodule Bee.Server do
 
       {:error, reason} ->
         Logger.info("Connection unavailable #{reason}")
-        :timer.sleep(100_000)
+        :timer.sleep(1000)
         {:noreply, opts, {:continue, :init_server}}
     end
   end
@@ -85,7 +90,7 @@ defmodule Bee.Server do
 
   @impl true
   def handle_continue(:controller, bee) do
-    :timer.apply_after(50, __MODULE__, :unlock, [:bee1])
+    :timer.apply_after(25, __MODULE__, :unlock, [:bee1])
 
     {:noreply, bee}
   end

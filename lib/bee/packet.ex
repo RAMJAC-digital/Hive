@@ -203,6 +203,7 @@ defmodule Bee.Packet do
       0x1058 -> :msgSetAttitude
       # 4185
       0x1059 -> :msgQueryAttitude
+      _rest -> :noop
     end
   end
 
@@ -308,7 +309,7 @@ defmodule Bee.Packet do
       |> borjoin((controlDataToTello(ry) &&& 0x07FF) <<< 11)
       |> borjoin((controlDataToTello(ly) &&& 0x07FF) <<< 22)
       |> borjoin((controlDataToTello(lx) &&& 0x07FF) <<< 33)
-      |> borjoin(0 <<< 44)
+      |> borjoin(1 <<< 44)
 
     payload =
       <<:binary.at(<<packedAxes>>, 0)>>
@@ -348,6 +349,12 @@ defmodule Bee.Packet do
       |> join(<<ms >>> 8>>)
 
     payload
+  end
+
+  def agent_ack(video_port) do
+    p1 = video_port &&& 0xFF
+    p2 = video_port >>> 8
+    "conn_req:" |> join(<<p1, p2>>)
   end
 
   defp join(stream, append) do
