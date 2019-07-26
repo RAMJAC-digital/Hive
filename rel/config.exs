@@ -3,9 +3,9 @@
 # either an environment, or release definition, where
 # `MyPlugin` is the name of the plugin module.
 
-## 
+##
 # Author:     Sterling Stanford-Jones
-# Copyright:      Copyright (C) 2019  <name of author>
+# Copyright:      Copyright (C) 2019
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -19,20 +19,19 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#             
+#
 Path.join(["rel", "plugins", "*.exs"])
 |> Path.wildcard()
 |> Enum.map(&Code.eval_file(&1))
 
 use Mix.Releases.Config,
-    # This sets the default release built by `mix release`
-    default_release: :default,
-    # This sets the default environment used by `mix release`
-    default_environment: Mix.env()
+  # This sets the default release built by `mix release`
+  default_release: :default,
+  # This sets the default environment used by `mix release`
+  default_environment: Mix.env()
 
 # For a full list of config options for both releases
 # and environments, visit https://hexdocs.pm/distillery/configuration.html
-
 
 # You may define one or more environments in this file,
 # an environment's settings will override those of a release
@@ -46,15 +45,15 @@ environment :dev do
   # It is recommended that you build with MIX_ENV=prod and pass
   # the --env flag to Distillery explicitly if you want to use
   # dev mode.
-  set dev_mode: true
-  set include_erts: true
-  set cookie: :"C)~z*G<V:{0eNtIAZ$5;h~{Mb86$Sk_7/cW0fJ&YW*rlklKw[xU]BN0^,315u^M*"
+  set(dev_mode: true)
+  set(include_erts: true)
+  set(cookie: :"C)~z*G<V:{0eNtIAZ$5;h~{Mb86$Sk_7/cW0fJ&YW*rlklKw[xU]BN0^,315u^M*")
 end
 
 environment :prod do
-  set include_erts: true
-  set include_src: true
-  set cookie: :".%iA=rT/iegoMm.IF:TBOB(3(GIrcEX=}S@%!yLh*z!Z}jnRa7g,s]^8O|}|!4J>"
+  set(include_erts: true)
+  set(include_src: true)
+  set(cookie: :".%iA=rT/iegoMm.IF:TBOB(3(GIrcEX=}S@%!yLh*z!Z}jnRa7g,s]^8O|}|!4J>")
 end
 
 # You may define one or more releases in this file.
@@ -63,9 +62,11 @@ end
 # will be used by default
 
 release :hive do
-  set version: current_version(:hive)
-  set applications: [
-    :runtime_tools
-  ]
-end
+  set(version: current_version(:hive))
 
+  set(
+    applications: [
+      :runtime_tools
+    ]
+  )
+end

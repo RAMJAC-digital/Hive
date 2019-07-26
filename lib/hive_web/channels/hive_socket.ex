@@ -1,7 +1,6 @@
-
-## 
+##
 # Author:     Sterling Stanford-Jones
-# Copyright:      Copyright (C) 2019  <name of author>
+# Copyright:      Copyright (C) 2019
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,15 +14,15 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#             
+#
 defmodule HiveWeb.HiveSocket do
   use Phoenix.Socket
 
   ## Channels
-  channel "bee:*", HiveWeb.BeeChannel
+  channel("bee:*", HiveWeb.BeeChannel)
 
   ## Transports
-  transport :websocket, Phoenix.Transports.WebSocket
+  transport(:websocket, Phoenix.Transports.WebSocket)
   # transport :longpoll, Phoenix.Transports.LongPoll
 
   # Socket params are passed from the client and can

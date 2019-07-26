@@ -1,7 +1,6 @@
-
-## 
+##
 # Author:     Sterling Stanford-Jones
-# Copyright:      Copyright (C) 2019  <name of author>
+# Copyright:      Copyright (C) 2019
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,64 +14,119 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#             
+#
 defmodule Bee.FlightData do
-  defstruct batteryCritical:          nil, #bool
-            batteryLow:               nil, #bool
-            batteryMilliVolts:        nil, #int16
-            batteryPercentage:        nil, #int8
-            batteryState:             nil, #bool
-            cameraState:              nil, #uint8
-            downVisualState:          nil, #bool
-            droneFlyTimeLeft:         nil, #int16
-            droneHover:               nil, #bool
-            eastSpeed:                nil, #int16
-            electricalMachineryState: nil, #uint8
-            emOpen:                   nil, #bool
-            errorState:               nil, #bool
-            factoryMode:              nil, #bool
-            flying:                   nil, #bool
-            flyMode:                  nil, #uint8
-            flyTime:                  nil, #int16
-            frontIn:                  nil, #bool
-            frontLSC:                 nil, #bool
-            frontOut:                 nil, #bool
-            gravityState:             nil, #bool
-            groundSpeed:              nil, #int16
-            height:                   nil, #int16 // seems to be in decimetres
-            imu:                      nil, #IMUData
-            imuCalibrationState:      nil, #int8
-            imuState:                 nil, #bool
-            lightStrength:            nil, #uint8
-            lowBatteryThreshold:      nil, #uint8
-            maxHeight:                nil, #uint8
-            mvo:                      nil, #MVOData
-            northSpeevo:              nil, #int16
-            onGround:                 nil, #bool
-            outageRecording:          nil, #bool
-            powerState:               nil, #bool
-            pressureState:            nil, #bool
-            smartVideoExitMode:       nil, #int16
-            ssid:                     nil, #string
-            throwFlyTimer:            nil, #int8
-            version:                  nil, #string
-            verticalSpeed:            nil, #int16
-            videoBitrate:             nil, #VBR
-            wifiInterference:         nil, #uint8
-            wifiStrength:             nil, #uint8
-            windState:                nil #bool
+  # bool
+  defstruct batteryCritical: nil,
+            # bool
+            batteryLow: nil,
+            # int16
+            batteryMilliVolts: nil,
+            # int8
+            batteryPercentage: nil,
+            # bool
+            batteryState: nil,
+            # uint8
+            cameraState: nil,
+            # bool
+            downVisualState: nil,
+            # int16
+            droneFlyTimeLeft: nil,
+            # bool
+            droneHover: nil,
+            # int16
+            eastSpeed: nil,
+            # uint8
+            electricalMachineryState: nil,
+            # bool
+            emOpen: nil,
+            # bool
+            errorState: nil,
+            # bool
+            factoryMode: nil,
+            # bool
+            flying: nil,
+            # uint8
+            flyMode: nil,
+            # int16
+            flyTime: nil,
+            # bool
+            frontIn: nil,
+            # bool
+            frontLSC: nil,
+            # bool
+            frontOut: nil,
+            # bool
+            gravityState: nil,
+            # int16
+            groundSpeed: nil,
+            # int16 // seems to be in decimetres
+            height: nil,
+            # IMUData
+            imu: nil,
+            # int8
+            imuCalibrationState: nil,
+            # bool
+            imuState: nil,
+            # uint8
+            lightStrength: nil,
+            # uint8
+            lowBatteryThreshold: nil,
+            # uint8
+            maxHeight: nil,
+            # MVOData
+            mvo: nil,
+            # int16
+            northSpeevo: nil,
+            # bool
+            onGround: nil,
+            # bool
+            outageRecording: nil,
+            # bool
+            powerState: nil,
+            # bool
+            pressureState: nil,
+            # int16
+            smartVideoExitMode: nil,
+            # string
+            ssid: nil,
+            # int8
+            throwFlyTimer: nil,
+            # string
+            version: nil,
+            # int16
+            verticalSpeed: nil,
+            # VBR
+            videoBitrate: nil,
+            # uint8
+            wifiInterference: nil,
+            # uint8
+            wifiStrength: nil,
+            # bool
+            windState: nil
 
   # MVOData comes from the flight log messages
   defmodule Bee.FlightData.MVOData do
-    defstruct positionX: nil, positionY: nil, positionZ: nil, #float32
-              velocityX: nil, velocityY: nil, velocityZ: nil  #int16
+    # float32
+    defstruct positionX: nil,
+              positionY: nil,
+              positionZ: nil,
+              # int16
+              velocityX: nil,
+              velocityY: nil,
+              velocityZ: nil
   end
 
   # IMUData comes from the flight log messages
   defmodule Bee.FlightData.IMUData do
     defstruct quaternionW: nil,
-              quaternionX: nil, quaternionY: nil, quaternionZ: nil, #float32
-              temperature: nil, #int16
-              yaw:         nil #int16 // derived from Quat fields, -180 > degrees > +180
+              # float32
+              quaternionX: nil,
+              quaternionY: nil,
+              quaternionZ: nil,
+              # int16
+              temperature: nil,
+              # int16 // derived from Quat fields, -180 > degrees > +180
+              yaw: nil
   end
 end

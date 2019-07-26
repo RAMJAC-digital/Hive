@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-## 
+##
 # Author:     Sterling Stanford-Jones
-# Copyright:      Copyright (C) 2019  <name of author>
+# Copyright:      Copyright (C) 2019
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -28,7 +28,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#             
+#
 
 defmodule GenerateDockerfile.AppConfig do
   require Logger

@@ -1,7 +1,6 @@
-
-## 
+##
 # Author:     Sterling Stanford-Jones
-# Copyright:      Copyright (C) 2019  <name of author>
+# Copyright:      Copyright (C) 2019
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#             
+#
 defmodule HiveWeb.BeeChannel do
   use HiveWeb, :channel
 
@@ -36,7 +35,7 @@ defmodule HiveWeb.BeeChannel do
   # It is also common to receive messages from the client and
   # broadcast to everyone in the current topic (bee:lobby).
   def handle_in("shout", payload, socket) do
-    broadcast socket, "shout", payload
+    broadcast(socket, "shout", payload)
     {:noreply, socket}
   end
 

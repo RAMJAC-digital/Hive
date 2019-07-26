@@ -1,7 +1,6 @@
-
-## 
+##
 # Author:     Sterling Stanford-Jones
-# Copyright:      Copyright (C) 2019  <name of author>
+# Copyright:      Copyright (C) 2019
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,12 +14,12 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#             
+#
 defmodule HiveWeb.PageView do
   use HiveWeb, :view
 
   def page() do
     # Get hornet here
-    Poison.encode! %{hey: "Buzz buzz from server!!!"}
+    Poison.encode!(%{hey: "Buzz buzz from server!!!"})
   end
 end

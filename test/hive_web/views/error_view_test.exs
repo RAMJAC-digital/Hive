@@ -1,7 +1,6 @@
-
-## 
+##
 # Author:     Sterling Stanford-Jones
-# Copyright:      Copyright (C) 2019  <name of author>
+# Copyright:      Copyright (C) 2019
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#             
+#
 defmodule HiveWeb.ErrorViewTest do
   use HiveWeb.ConnCase, async: true
 
@@ -23,12 +22,10 @@ defmodule HiveWeb.ErrorViewTest do
   import Phoenix.View
 
   test "renders 404.html" do
-    assert render_to_string(HiveWeb.ErrorView, "404.html", []) ==
-           "Not Found"
+    assert render_to_string(HiveWeb.ErrorView, "404.html", []) == "Not Found"
   end
 
   test "renders 500.html" do
-    assert render_to_string(HiveWeb.ErrorView, "500.html", []) ==
-           "Internal Server Error"
+    assert render_to_string(HiveWeb.ErrorView, "500.html", []) == "Internal Server Error"
   end
 end

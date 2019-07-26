@@ -1,7 +1,6 @@
-
-## 
+##
 # Author:     Sterling Stanford-Jones
-# Copyright:      Copyright (C) 2019  <name of author>
+# Copyright:      Copyright (C) 2019
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,12 +14,13 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#             
-Application.load(:hive) #(1)
+#
+# (1)
+Application.load(:hive)
 
-for app <- Application.spec(:hive,:applications) do #(2)
+# (2)
+for app <- Application.spec(:hive, :applications) do
   Application.ensure_all_started(app)
 end
-
 
 ExUnit.start()

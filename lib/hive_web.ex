@@ -1,7 +1,6 @@
-
-## 
+##
 # Author:     Sterling Stanford-Jones
-# Copyright:      Copyright (C) 2019  <name of author>
+# Copyright:      Copyright (C) 2019
 #
 # This program is free software: you can redistribute it and/or modify
 # it under the terms of the GNU General Public License as published by
@@ -15,7 +14,7 @@
 #
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <https://www.gnu.org/licenses/>.
-#             
+#
 defmodule HiveWeb do
   @moduledoc """
   The entrypoint for defining your web interface, such
@@ -46,8 +45,9 @@ defmodule HiveWeb do
 
   def view do
     quote do
-      use Phoenix.View, root: "lib/hive_web/templates",
-                        namespace: HiveWeb
+      use Phoenix.View,
+        root: "lib/hive_web/templates",
+        namespace: HiveWeb
 
       # Import convenience functions from controllers
       import Phoenix.Controller, only: [get_flash: 2, view_module: 1]
