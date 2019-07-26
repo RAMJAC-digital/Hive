@@ -1,9 +1,0 @@
-{
-    // "terminal.integrated.shell.osx": "/Users/janus/bin/vscode_hive.sh",
-    "files.exclude": {
-        "**/deps": true,
-        "**/priv": true,
-        "**/.elixir_ls": true,
-        "**/_build": true,
-    },
-}
